@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>甜心開發者的冒險日誌 | 網頁作品集入口網站</title>
+
+    <!-- Tailwind CSS (樣式庫) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome (圖示庫) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts (甜美圓潤字型) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-pink: #ff9a9e;
+            --primary-purple: #fecfef;
+            --accent-purple: #a18cd1;
+            --sparkle-yellow: #fde047;
+        }
+
+        body {
+            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(-45deg, #ff9a9e, #fecfef, #a18cd1, #fbc2eb, #fad0c4);
+            background-size: 400% 400%;
+            animation: gradientMove 12s ease infinite;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 柔和流動背景動畫 */
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 毛玻璃通用效果 (Glassmorphism) */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1.5px solid rgba(255, 255, 255, 0.65);
+            box-shadow: 0 12px 32px 0 rgba(235, 160, 195, 0.25);
+        }
+
+        /* 飄浮光暈與微粒背景 */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.1));
+            box-shadow: 0 0 12px rgba(255, 182, 193, 0.5);
+            animation: floatParticle linear infinite;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(105vh) rotate(0deg) scale(0.6);
+                opacity: 0;
+            }
+            15% { opacity: 0.8; }
+            85% { opacity: 0.8; }
+            100% {
+                transform: translateY(-10vh) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* 大頭貼光暈懸停發光效果 */
+        .avatar-container {
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .avatar-container::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 9999px;
+            background: linear-gradient(45deg, #ff9a9e, #a18cd1, #fde047, #ff9a9e);
+            background-size: 300% 300%;
+            z-index: -1;
+            animation: glowRotate 4s linear infinite;
+            filter: blur(8px);
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        .avatar-container:hover {
+            transform: scale(1.08) rotate(3deg);
+        }
+        .avatar-container:hover::before {
+            opacity: 1;
+            filter: blur(12px);
+        }
+
+        @keyframes glowRotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 已解鎖關卡按鈕樣式與高質感 Hover */
+        .card-unlocked {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 240, 248, 0.55));
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 24px rgba(255, 154, 158, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 閃爍斜向微光掃過效果 */
+        .card-unlocked::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.7) 50%,
+                transparent 70%
+            );
+            transform: rotate(35deg) translateY(-120%);
+            transition: transform 0.7s ease;
+        }
+
+        .card-unlocked:hover::before {
+            transform: rotate(35deg) translateY(120%);
+        }
+
+        .card-unlocked:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 18px 36px rgba(255, 105, 180, 0.35), 0 0 20px rgba(255, 255, 255, 0.9);
+            border-color: #ffffff;
+        }
+
+        /* 未解鎖關卡卡片 */
+        .card-locked {
+            background: rgba(230, 225, 235, 0.3);
+            border: 1.5px dashed rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            color: #71717a;
+            transition: all 0.3s ease;
+        }
+
+        .card-locked:hover {
+            background: rgba(220, 215, 230, 0.45);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: translateY(-2px);
+        }
+
+        /* 鎖頭圖示懸停微震動 */
+        .card-locked:hover .lock-icon {
+            animation: lockWiggle 0.4s ease-in-out infinite alternate;
+        }
+
+        @keyframes lockWiggle {
+            0% { transform: rotate(-8deg); }
+            100% { transform: rotate(8deg); }
+        }
+
+        /* 點擊未解鎖卡片時的Shake搖晃效果 */
+        .shake-anim {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        /* 自訂 Toast 提示訊息彈窗 */
+        #toast {
+            visibility: hidden;
+            min-width: 280px;
+            background: rgba(255, 255, 255, 0.92);
+            color: #7e22ce;
+            text-align: center;
+            border-radius: 9999px;
+            padding: 14px 28px;
+            position: fixed;
+            z-index: 50;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            opacity: 0;
+            box-shadow: 0 10px 30px rgba(161, 140, 209, 0.45);
+            backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
+            transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+            font-weight: 600;
+        }
+
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body class="relative flex flex-col items-center justify-start min-h-screen py-8 px-4 sm:px-6 md:px-8">
+
+    <!-- 背景動態漂浮微粒區 -->
+    <div class="bg-particles" id="particlesContainer"></div>
+
+    <!-- 主要內容包裹容器 -->
+    <main class="w-full max-w-6xl z-10 space-y-8">
+
+        <!-- Header / 個人資訊展示區域 (Hero Glass Card) -->
+        <header class="glass-panel rounded-3xl p-6 sm:p-10 text-center flex flex-col items-center relative overflow-hidden">
+            <!-- 背景裝飾夢幻彩色圓形微光 -->
+            <div class="absolute -top-16 -right-16 w-48 h-48 bg-pink-300/40 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute -bottom-16 -left-16 w-48 h-48 bg-purple-300/40 rounded-full blur-2xl pointer-events-none"></div>
+
+            <!-- 個人大頭貼 -->
+            <div class="avatar-container mb-4 cursor-pointer">
+                <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full p-1 bg-white/90 overflow-hidden shadow-xl">
+                    <!-- 可愛風預設大頭貼圖片 -->
+                    <img src="https://i.postimg.cc/GhQL3X0t/IMG-2838-(1).png" 
+                         alt="Developer Avatar" 
+                         class="w-full h-full rounded-full object-cover bg-gradient-to-b from-pink-100 to-purple-100"
+                         onerror="this.src='https://placehold.co/150x150/ffb6c1/ffffff?text=💖'">
+                </div>
+                <!-- 等級標籤 Badge -->
+                <span class="absolute bottom-0 right-1 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg border-2 border-white flex items-center gap-1">
+                    <i class="fa-solid fa-sparkles text-yellow-300"></i> Lv.2 Coder
+                </span>
+            </div>
+
+            <!-- 姓名與簡介 -->
+            <h1 class="text-2xl sm:text-4xl font-extrabold text-gray-800 tracking-wide mb-1 flex items-center gap-2">
+                yuyan <span class="text-pink-500 animate-pulse">✨</span>
+            </h1>
+            <p class="text-purple-800/80 font-medium text-sm sm:text-base max-w-lg mb-6">
+                歡迎來到我的前端程式冒險地圖！每一週都是一關全新的挑戰，記錄我的學習點滴 🌸
+            </p>
+
+            <!-- 闖關進度條 (Achievement Progress Bar) -->
+            <div class="w-full max-w-md bg-white/60 rounded-full p-1.5 border border-white/80 shadow-inner">
+                <div class="flex justify-between text-xs font-bold text-purple-900 px-3 mb-1">
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-trophy text-amber-400"></i> 闖關總進度</span>
+                    <span class="text-pink-600">2 / 16 關 (12.5%)</span>
+                </div>
+                <!-- 填滿進度條 -->
+                <div class="w-full bg-pink-100 rounded-full h-3.5 overflow-hidden border border-pink-200/50">
+                    <div class="bg-gradient-to-r from-pink-400 via-purple-400 to-pink-500 h-full rounded-full transition-all duration-1000 shadow-sm relative overflow-hidden" style="width: 12.5%;">
+                        <!-- 進度條內部動態光澤 -->
+                        <div class="absolute inset-0 bg-white/30 animate-pulse"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 16 關卡選單區塊 -->
+        <section class="space-y-5">
+            <div class="flex items-center justify-between px-2">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-pink-500"></i> 冒險地圖選單
+                </h2>
+                <span class="text-xs sm:text-sm text-purple-900 bg-white/50 backdrop-blur-md px-3 py-1.5 rounded-full font-semibold border border-white/60 shadow-sm">
+                    點擊按鈕進入對應作品 🚀
+                </span>
+            </div>
+
+            <!-- 16個按鈕響應式網格 (RWD Layout) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+
+                <!-- ===== 按鈕 1 (已解鎖) ===== -->
+                <a href="w1/index.html" class="card-unlocked rounded-2xl p-5 flex flex-col justify-between h-44 group cursor-pointer text-left">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold tracking-wider text-pink-600 bg-pink-100/90 px-3 py-1 rounded-full border border-pink-200">
+                            WEEK 01
+                        </span>
+                        <span class="w-9 h-9 rounded-full bg-pink-500 text-white flex items-center justify-center text-sm shadow-md group-hover:scale-110 group-hover:rotate-12 transition-transform">
+                            <i class="fa-solid fa-id-card"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-lg group-hover:text-pink-600 transition-colors">
+                            Week 1 - 數位名片
+                        </h3>
+                        <p class="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-check"></i> 已解鎖 ✨
+                        </p>
+                    </div>
+                    <div class="w-full bg-pink-200/50 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-pink-500 h-full w-full"></div>
+                    </div>
+                </a>
+
+                <!-- ===== 按鈕 2 (已解鎖) ===== -->
+                <a href="w2/index.html" class="card-unlocked rounded-2xl p-5 flex flex-col justify-between h-44 group cursor-pointer text-left">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold tracking-wider text-purple-600 bg-purple-100/90 px-3 py-1 rounded-full border border-purple-200">
+                            WEEK 02
+                        </span>
+                        <span class="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm shadow-md group-hover:scale-110 group-hover:rotate-12 transition-transform">
+                            <i class="fa-solid fa-utensils"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-lg group-hover:text-purple-600 transition-colors">
+                            Week 2 - 今天吃甚麼?
+                        </h3>
+                        <p class="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-check"></i> 已解鎖 ✨
+                        </p>
+                    </div>
+                    <div class="w-full bg-purple-200/50 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-purple-500 h-full w-full"></div>
+                    </div>
+                </a>
+
+                <!-- ===== 按鈕 3 到 16 (未解鎖狀態) ===== -->
+
+                <!-- 關卡 3 -->
+                <button onclick="triggerLockedCard(this, 3)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 03</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 3 - 敬請期待</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    </div>
+                </button>
+
+                <!-- 關卡 4 -->
+                <button onclick="triggerLockedCard(this, 4)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 04</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 4 - 敬請期待</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    </div>
+                </button>
+
+                <!-- 關卡 5 -->
+                <button onclick="triggerLockedCard(this, 5)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 05</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 5 - 敬請期待</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    </div>
+                </button>
+
+                <!-- 關卡 6 -->
+                <button onclick="triggerLockedCard(this, 6)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 06</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 6 - 敬請期待</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    </div>
+                </button>
+
+                <!-- 關卡 7 -->
+                <button onclick="triggerLockedCard(this, 7)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 07</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 7 - 敬請期待</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    </div>
+                </button>
+
+                <!-- 關卡 8 -->
+                <button onclick="triggerLockedCard(this, 8)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 08</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 8 - 中場檢討</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-star text-amber-500"></i> 期中里程碑
+                    </div>
+                </button>
+
+                <!-- 關卡 9 -->
+                <button onclick="triggerLockedCard(this, 9)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 09</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 9 - 敬請期待</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    </div>
+                </button>
+
+                <!-- 關卡 10 -->
+                <button onclick="triggerLockedCard(this, 10)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 10</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 10 - 敬請期待</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    </div>
+                </button>
+
+                <!-- 關卡 11 -->
+                <button onclick="triggerLockedCard(this, 11)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 11</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 11 - 敬請期待</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    </div>
+                </button>
+
+                <!-- 關卡 12 -->
+                <button onclick="triggerLockedCard(this, 12)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 12</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 12 - 敬請期待</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    </div>
+                </button>
+
+                <!-- 關卡 13 -->
+                <button onclick="triggerLockedCard(this, 13)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 13</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 13 - 敬請期待</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    </div>
+                </button>
+
+                <!-- 關卡 14 -->
+                <button onclick="triggerLockedCard(this, 14)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 14</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 14 - 敬請期待</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    </div>
+                </button>
+
+                <!-- 關卡 15 -->
+                <button onclick="triggerLockedCard(this, 15)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 15</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-base">Week 15 - 敬請期待</h3>
+                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    </div>
+                </button>
+
+                <!-- 關卡 16 (終極大魔王關) -->
+                <button onclick="triggerLockedCard(this, 16)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group border-purple-300/60">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-xs font-semibold text-purple-700 bg-purple-100/50 px-2.5 py-1 rounded-full">WEEK 16</span>
+                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-700 text-base">Week 16 - 期末專題大魔王</h3>
+                        <p class="text-xs text-gray-400 mt-1">Final Boss Level</p>
+                    </div>
+                    <div class="text-[11px] text-purple-900 font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-crown text-yellow-500"></i> 終極大關卡
+                    </div>
+                </button>
+
+            </div>
+        </section>
+
+        <!-- 頁尾 -->
+        <footer class="text-center pt-8 pb-4 text-xs text-white/90 font-medium tracking-wide">
+            <p class="drop-shadow-sm">© 2026 Web Development Portfolio ‧ Handcrafted with 💖 & Glassmorphism</p>
+        </footer>
+
+    </main>
+
+    <!-- 浮動 Tip / Toast 提示訊息彈窗 -->
+    <div id="toast">
+        <i class="fa-solid fa-lock text-pink-500 mr-2"></i>
+        <span id="toastText">關卡尚未解鎖，努力闖關中！🔒</span>
+    </div>
+
+    <script>
+        // 1. 動態生成背景漂浮微粒與氣泡
+        function initFloatingParticles() {
+            const container = document.getElementById('particlesContainer');
+            const particleCount = 18; // 數量
+
+            for (let i = 0; i < particleCount; i++) {
+                const p = document.createElement('div');
+                p.classList.add('particle');
+                
+                // 隨機設置大小、水平位置、動畫時長與延遲
+                const size = Math.random() * 35 + 12; // 12px - 47px
+                const left = Math.random() * 100; // 0% - 100%
+                const duration = Math.random() * 10 + 8; // 8s - 18s
+                const delay = Math.random() * 6; // 0s - 6s
+
+                p.style.width = `${size}px`;
+                p.style.height = `${size}px`;
+                p.style.left = `${left}%`;
+                p.style.animationDuration = `${duration}s`;
+                p.style.animationDelay = `${delay}s`;
+
+                container.appendChild(p);
+            }
+        }
+
+        // 2. 點擊未解鎖卡片觸發 Shake 動畫與提示 Popup
+        function triggerLockedCard(cardElement, levelNumber) {
+            // 重置 Shake 動畫 (移除再重新新增)
+            cardElement.classList.remove('shake-anim');
+            void cardElement.offsetWidth; // 強制瀏覽器重繪 (Reflow)
+            cardElement.classList.add('shake-anim');
+
+            // 顯示溫馨 Toast 提示
+            showToast(`🔒 Week ${levelNumber} 關卡尚未解鎖，努力闖關中！加油！`);
+        }
+
+        // 3. 顯示與隱藏 Toast 彈窗
+        let toastTimer = null;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toastText');
+            
+            toastText.textContent = message;
+            toast.classList.add('show');
+
+            // 清除之前的定時器，避免重複點擊時快速消失
+            if (toastTimer) clearTimeout(toastTimer);
+
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // 頁面初次載入時啟動微粒動畫
+        window.addEventListener('DOMContentLoaded', () => {
+            initFloatingParticles();
+        });
+    </script>
+</body>
+</html>
