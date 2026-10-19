@@ -11,6 +11,453 @@
     <script src="./script.js"></script>
   </body>
 </html>
+這是一份完全符合要求的 **單一 HTML 檔案 (`index.html`)**，包含完整的 HTML、CSS 與 JavaScript 程式碼。整體風格專為「可愛甜美」設計，可以直接複製貼到 CodePen 或本機執行！
+
+```html
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>朋友對我的動態留言板 💌</title>
+  
+  <!-- 載入可愛的 Google Fonts (Fredoka & Noto Sans TC) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome 圖示庫 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* ==========================================
+       1. 全局變數與視覺主題控制（可在此自訂顏色）
+       ========================================== */
+    :root {
+      /* 主題配色 */
+      --bg-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #a18cd1 100%);
+      --card-bg: rgba(255, 255, 255, 0.85); /* 卡片半透明毛玻璃底色 */
+      --text-color: #5a3d5c;              /* 主文字顏色 (深紫灰) */
+      --accent-color: #ff6b81;            /* 強調色 (甜美粉紅) */
+      --highlight-shadow: rgba(255, 107, 129, 0.6); /* 亮起卡片的光暈顏色 */
+      
+      /* 輪播秒數設定：單位為毫秒 (ms)，3000ms = 3秒 */
+      --carousel-speed-ms: 3000;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: var(--text-color);
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* 頁頭標題 */
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      color: #ffffff;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+      letter-spacing: 1px;
+    }
+
+    header p {
+      color: #fff0f5;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      font-weight: 500;
+    }
+
+    /* 主容器 */
+    .container {
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    /* ==========================================
+       2. 酷炫載入中動畫 (Loading Spinner)
+       ========================================== */
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 0;
+    }
+
+    .loader-heart {
+      font-size: 3.5rem;
+      color: #ff6b81;
+      animation: heartbeat 1.2s infinite ease-in-out;
+    }
+
+    .loading-text {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+      letter-spacing: 1px;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.3) rotate(5deg); }
+    }
+
+    /* ==========================================
+       3. 瀑布流排版 (Masonry Layout)
+       ========================================== */
+    .masonry-wall {
+      /* CSS 多欄式排版實現瀑布流 */
+      column-count: 3;
+      column-gap: 1.5rem;
+      display: none; /* 載入完成前隱藏 */
+    }
+
+    /* 響應式調整欄數 */
+    @media (max-width: 900px) {
+      .masonry-wall { column-count: 2; }
+    }
+    @media (max-width: 600px) {
+      .masonry-wall { column-count: 1; }
+    }
+
+    /* ==========================================
+       4. 留言卡片樣式與動態特效
+       ========================================== */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      break-inside: avoid; /* 防止卡片被跨欄截斷 */
+      border: 3px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+
+      /* 平滑過渡動畫（控制放大、模糊與發光） */
+      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      position: relative;
+    }
+
+    /* 卡片頭部（作者與時間） */
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ffeaa7;
+      color: #d63031;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .author-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .author-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #333333;
+    }
+
+    .timestamp {
+      font-size: 0.75rem;
+      color: #888888;
+    }
+
+    /* 留言內容 */
+    .card-body {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #4a4a4a;
+      white-space: pre-wrap; /* 保留換行 */
+      word-break: break-word;
+    }
+
+    /* 裝飾可愛小貼紙 */
+    .card::after {
+      content: '🌸';
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      font-size: 1rem;
+      opacity: 0.7;
+    }
+
+    /* ------------------------------------------
+       5. 輪播焦點特效（亮起 vs 變暗模糊）
+       ------------------------------------------ */
+    /* 被選中的焦點卡片：放大 + 高亮發光 + 邊框色變鮮豔 */
+    .card.highlight {
+      transform: scale(1.08) translateY(-5px);
+      border-color: var(--accent-color);
+      box-shadow: 0 12px 30px var(--highlight-shadow), 0 0 15px var(--accent-color);
+      opacity: 1 !important;
+      filter: blur(0px) !important;
+      z-index: 10;
+    }
+
+    /* 未被選中的卡片：稍微變暗、變模糊 */
+    .card.dimmed {
+      opacity: 0.45;
+      filter: blur(1.5px);
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1><i class="fa-solid fa-heart"></i> 朋友對我的悄悄話留言牆 <i class="fa-solid fa-heart"></i></h1>
+    <p>閃耀每份珍貴的友情與回憶 ✨</p>
+  </header>
+
+  <div class="container">
+    <!-- 讀取中酷炫動畫 -->
+    <div id="loading">
+      <div class="loader-heart"><i class="fa-solid fa-face-smile-beam"></i></div>
+      <div class="loading-text">讀取留言中... 💕</div>
+    </div>
+
+    <!-- 留言卡片瀑布流牆 -->
+    <div id="wall" class="masonry-wall"></div>
+  </div>
+
+  <script>
+    /* ==========================================
+       6. JavaScript 資料處理與輪播邏輯
+       ========================================== */
+
+    // Google 試算表 CSV 發布網址
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQoiQOcoJPGytmTJ3MVzGvNtWhg9bUCQEQH998zeGBLOXSDZRPr27AYjFqGGtVtQ9F2QueQ5ordcG-7/pub?output=csv';
+
+    // 輪播間隔時間（毫秒）—【可在這裡修改輪播速度】
+    const CAROUSEL_INTERVAL = 3000; // 3000ms = 3秒
+
+    let messageList = [];      // 儲存解析後的留言資料
+    let cardElements = [];     // 儲存 DOM 卡片元件
+    let currentIndex = 0;      // 當前高亮的卡片索引
+    let carouselTimer = null;  // 計時器物件
+
+    // DOM 元素載入完畢後開始執行
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchMessages();
+    });
+
+    /**
+     * 從 Google 試算表 CSV 抓取資料
+     */
+    function fetchMessages() {
+      fetch(csvUrl)
+        .then(response => {
+          if (!response.ok) throw new Error('網路回應異常');
+          return response.text();
+        })
+        .then(csvText => {
+          // 解析 CSV 資料
+          messageList = parseCSV(csvText);
+
+          // 隱藏 Loading 動畫，顯示留言牆
+          document.getElementById('loading').style.display = 'none';
+          const wall = document.getElementById('wall');
+          wall.style.display = 'block';
+
+          // 動態渲染卡片
+          renderCards(messageList);
+
+          // 啟動 3 秒輪播亮起特效
+          if (cardElements.length > 0) {
+            startCarousel();
+          }
+        })
+        .catch(error => {
+          console.error('抓取資料失敗:', error);
+          document.getElementById('loading').innerHTML = `
+            <div style="color: #ffffff; text-align: center;">
+              <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem;"></i>
+              <p style="margin-top: 1rem;">讀取留言失敗了，請重新整理頁面再試一次喔！</p>
+            </div>
+          `;
+        });
+    }
+
+    /**
+     * 健全的 CSV 解析器（支援雙引號包覆、內部包含逗號與換行的留言）
+     */
+    function parseCSV(text) {
+      const rows = [];
+      let currentRow = [];
+      let currentCell = '';
+      let insideQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"') {
+          if (insideQuotes && nextChar === '"') {
+            currentCell += '"';
+            i++; // 跳過轉義引號
+          } else {
+            insideQuotes = !insideQuotes;
+          }
+        } else if (char === ',' && !insideQuotes) {
+          currentRow.push(currentCell.trim());
+          currentCell = '';
+        } else if ((char === '\r' || char === '\n') && !insideQuotes) {
+          if (char === '\r' && nextChar === '\n') {
+            i++;
+          }
+          currentRow.push(currentCell.trim());
+          if (currentRow.length > 1 || currentRow[0] !== '') {
+            rows.push(currentRow);
+          }
+          currentRow = [];
+          currentCell = '';
+        } else {
+          currentCell += char;
+        }
+      }
+
+      if (currentCell || currentRow.length > 0) {
+        currentRow.push(currentCell.trim());
+        rows.push(currentRow);
+      }
+
+      // 濾除標題列（如果第一列包含 "時間戳記"）
+      let dataRows = rows;
+      if (rows.length > 0 && rows[0][0].includes('時間')) {
+        dataRows = rows.slice(1);
+      }
+
+      // 轉換成 JSON 物件陣列： [0: 時間, 1: 名字, 2: 留言]
+      return dataRows.map(row => ({
+        timestamp: row[0] || '未知時間',
+        name: row[1] || '匿名朋友',
+        message: row[2] || '（這朋友沒有留下文字～）'
+      }));
+    }
+
+    /**
+     * 將資料動態產生卡片 HTML 並插入牆面
+     */
+    function renderCards(data) {
+      const wall = document.getElementById('wall');
+      wall.innerHTML = '';
+      cardElements = [];
+
+      // 可愛繽紛頭像大寫字母顏色清單
+      const avatarColors = ['#ff9a9e', '#a18cd1', '#fbc2eb', '#fad0c4', '#ffb6c1', '#84fab0'];
+
+      data.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        // 取得名稱首字做頭像
+        const firstLetter = item.name.charAt(0).toUpperCase();
+        const color = avatarColors[index % avatarColors.length];
+
+        card.innerHTML = `
+          <div class="card-header">
+            <div class="avatar" style="background-color: ${color};">${firstLetter}</div>
+            <div class="author-info">
+              <span class="author-name">${escapeHTML(item.name)}</span>
+              <span class="timestamp">${escapeHTML(item.timestamp)}</span>
+            </div>
+          </div>
+          <div class="card-body">${escapeHTML(item.message)}</div>
+        `;
+
+        wall.appendChild(card);
+        cardElements.push(card);
+      });
+    }
+
+    /**
+     * 轉義 HTML 標籤，防止 XSS 攻擊
+     */
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag)
+      );
+    }
+
+    /**
+     * 啟動 3 秒輪播高亮特效（setInterval）
+     */
+    function startCarousel() {
+      // 立即執行第一次高亮
+      highlightCard(currentIndex);
+
+      // 每隔 3 秒進行下一張輪播
+      carouselTimer = setInterval(() => {
+        currentIndex = (currentIndex + 1) % cardElements.length;
+        highlightCard(currentIndex);
+      }, CAROUSEL_INTERVAL);
+    }
+
+    /**
+     * 將指定 index 的卡片亮起，其餘變暗變模糊
+     */
+    function highlightCard(targetIndex) {
+      cardElements.forEach((card, idx) => {
+        if (idx === targetIndex) {
+          card.classList.add('highlight');
+          card.classList.remove('dimmed');
+          
+          // 平滑滾動讓選中的卡片維持在畫面視野內（當卡片數量多時很實用）
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          card.classList.remove('highlight');
+          card.classList.add('dimmed');
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+
+這是一份為您修改好的完整主頁面程式碼！我已經幫您將 **Week 4** 從原本的「敬請期待」解鎖，改成了您指定的名稱 **「悄悄話」**，連結指向 `w4/index.html`（檔案路徑您可以根據您的專題資料夾結構自行調整），並且頂部的闖關進度也已經自動幫您更新為 `4 / 16 關 (25.0%)` 囉！
+
+您可以直接複製以下完整程式碼並取代您的 `index.html`：
+
+```html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -269,11 +716,11 @@
             <div class="w-full max-w-md bg-white/60 rounded-full p-1.5 border border-white/80 shadow-inner">
                 <div class="flex justify-between text-xs font-bold text-purple-900 px-3 mb-1">
                     <span class="flex items-center gap-1"><i class="fa-solid fa-trophy text-amber-400"></i> 闖關總進度</span>
-                    <span class="text-pink-600">3 / 16 關 (18.8%)</span>
+                    <span class="text-pink-600">4 / 16 關 (25.0%)</span>
                 </div>
                 <!-- 填滿進度條 -->
                 <div class="w-full bg-pink-100 rounded-full h-3.5 overflow-hidden border border-pink-200/50">
-                    <div class="bg-gradient-to-r from-pink-400 via-purple-400 to-pink-500 h-full rounded-full transition-all duration-1000 shadow-sm relative overflow-hidden" style="width: 18.8%;">
+                    <div class="bg-gradient-to-r from-pink-400 via-purple-400 to-pink-500 h-full rounded-full transition-all duration-1000 shadow-sm relative overflow-hidden" style="width: 25.0%;">
                         <!-- 進度條內部動態光澤 -->
                         <div class="absolute inset-0 bg-white/30 animate-pulse"></div>
                     </div>
@@ -364,22 +811,30 @@
                     </div>
                 </a>
 
-                <!-- ===== 按鈕 4 到 16 (未解鎖狀態) ===== -->
-
-                <!-- 關卡 4 -->
-                <button onclick="triggerLockedCard(this, 4)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
-                    <div class="flex justify-between items-start w-full">
-                        <span class="text-xs font-semibold text-gray-500 bg-white/30 px-2.5 py-1 rounded-full">WEEK 04</span>
-                        <span class="text-xl lock-icon transition-transform">🔒</span>
+                <!-- ===== 按鈕 4 (已解鎖 - 悄悄話) ===== -->
+                <a href="w4/index.html" class="card-unlocked rounded-2xl p-5 flex flex-col justify-between h-44 group cursor-pointer text-left">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold tracking-wider text-pink-600 bg-pink-100/90 px-3 py-1 rounded-full border border-pink-200">
+                            WEEK 04
+                        </span>
+                        <span class="w-9 h-9 rounded-full bg-pink-500 text-white flex items-center justify-center text-sm shadow-md group-hover:scale-110 group-hover:rotate-12 transition-transform">
+                            <i class="fa-solid fa-comment-dots"></i>
+                        </span>
                     </div>
                     <div>
-                        <h3 class="font-bold text-gray-600 text-base">Week 4 - 敬請期待</h3>
-                        <p class="text-xs text-gray-400 mt-1">Locked Level</p>
+                        <h3 class="font-bold text-gray-800 text-lg group-hover:text-pink-600 transition-colors">
+                            Week 4 - 悄悄話
+                        </h3>
+                        <p class="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-check"></i> 已解鎖 ✨
+                        </p>
                     </div>
-                    <div class="text-[11px] text-purple-800/60 font-medium flex items-center gap-1">
-                        <i class="fa-solid fa-lock text-[10px]"></i> 達成前置任務解鎖
+                    <div class="w-full bg-pink-200/50 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-pink-500 h-full w-full"></div>
                     </div>
-                </button>
+                </a>
+
+                <!-- ===== 按鈕 5 到 16 (未解鎖狀態) ===== -->
 
                 <!-- 關卡 5 -->
                 <button onclick="triggerLockedCard(this, 5)" class="card-locked rounded-2xl p-5 flex flex-col justify-between h-44 text-left relative group">
@@ -587,7 +1042,6 @@
                 const p = document.createElement('div');
                 p.classList.add('particle');
 
-                // 隨機設置大小、水平位置、動畫時長與延遲
                 const size = Math.random() * 35 + 12; // 12px - 47px
                 const left = Math.random() * 100; // 0% - 100%
                 const duration = Math.random() * 10 + 8; // 8s - 18s
@@ -605,12 +1059,10 @@
 
         // 2. 點擊未解鎖卡片觸發 Shake 動畫與提示 Popup
         function triggerLockedCard(cardElement, levelNumber) {
-            // 重置 Shake 動畫 (移除再重新新增)
             cardElement.classList.remove('shake-anim');
             void cardElement.offsetWidth; // 強制瀏覽器重繪 (Reflow)
             cardElement.classList.add('shake-anim');
 
-            // 顯示溫馨 Toast 提示
             showToast(`🔒 Week ${levelNumber} 關卡尚未解鎖，努力闖關中！加油！`);
         }
 
@@ -623,7 +1075,6 @@
             toastText.textContent = message;
             toast.classList.add('show');
 
-            // 清除過的定時器，避免重複點擊時快速消失
             if (toastTimer) clearTimeout(toastTimer);
 
             toastTimer = setTimeout(() => {
@@ -638,3 +1089,5 @@
     </script>
 </body>
 </html>
+
+```
